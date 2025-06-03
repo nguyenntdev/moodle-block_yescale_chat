@@ -91,7 +91,7 @@ class chat extends \block_openai_chat\completion {
             ),
         ));
 
-        $response = $curl->post("https://api.openai.com/v1/chat/completions", json_encode($curlbody));
+        $response = $curl->post("https://api.yescale.io/v1/chat/completions", json_encode($curlbody));
         $response = json_decode($response);
 
         $message = null;

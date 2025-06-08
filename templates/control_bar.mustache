@@ -26,6 +26,7 @@
         "pix_popout": relative url of the popout pix to the root of moodle
         "pix_arrow_right": relative url of the arrow right pix to the root of moodle
         "pix_refresh": relative url of the refresh pix to the root of moodle
+        "models": array of model names
     }
 }}
 
@@ -33,19 +34,18 @@
     {{#logging_enabled}}
         <div title='{{#str}}loggingenabled, block_openai_chat{{/str}}' class='recording'></div>
     {{/logging_enabled}}
-    <button class='openai_input_popout_btn' title="{{#str}}popout, block_openai_chat {{/str}}" id="popout">
-        <img src="{{{config.wwwroot}}}{{{ pix_popout }}}" alt="{{#str}}popout, block_openai_chat {{/str}}" class='openai_input_popout_btn_icon' />
-    </button>
 {{/is_edit_mode}}
-<div id="control_bar">
+<div id="control_bar" role="region" aria-label="Chat controls">
     <div class="openai_input_bar" id="input_bar">
-
-        <textarea aria-label="{{#str}}askaquestion, block_openai_chat{{/str}}" rows=1 id="openai_input" placeholder="{{#str}}askaquestion, block_openai_chat{{/str}}" type="text" name="message"></textarea>
-        <button class='openai_input_submit_btn' title="{{#str}}askaquestion, block_openai_chat{{/str}}" id="go">
+        <textarea aria-label="Nhập câu hỏi" rows=1 id="openai_input" placeholder="Nhập câu hỏi" type="text" name="message"></textarea>
+        <button class='openai_input_submit_btn' title="{{#str}}askaquestion, block_openai_chat{{/str}}" id="go" aria-label="{{#str}}askaquestion, block_openai_chat{{/str}}">
             <img src="{{{config.wwwroot}}}{{{ pix_arrow_right }}}" alt="{{#str}}askaquestion, block_openai_chat{{/str}}" class='openai_input_submit_btn_icon'/>
         </button>
+        <button class='openai_input_refresh_btn' title="{{#str}}new_chat, block_openai_chat {{/str}}" id="refresh" aria-label="{{#str}}new_chat, block_openai_chat{{/str}}">
+            <img src="{{{config.wwwroot}}}{{{ pix_refresh }}}" class='openai_input_refresh_btn_icon' alt="{{#str}}new_chat, block_openai_chat {{/str}}" />
+        </button>
+        <button class='openai_input_popout_btn' title="{{#str}}popout, block_openai_chat {{/str}}" id="popout">
+            <img src="{{{config.wwwroot}}}{{{ pix_popout }}}" alt="{{#str}}popout, block_openai_chat {{/str}}" class='openai_input_popout_btn_icon' />
+        </button>
     </div>
-    <button class='openai_input_refresh_btn' title="{{#str}}new_chat, block_openai_chat {{/str}}" id="refresh">
-        <img src="{{{config.wwwroot}}}{{{ pix_refresh }}}" class='openai_input_refresh_btn_icon' alt="{{#str}}new_chat, block_openai_chat {{/str}}" />
-    </button>
 </div>

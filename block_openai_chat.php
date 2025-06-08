@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+require_once __DIR__.'/lib.php';
+
 class block_openai_chat extends block_base {
     public function init() {
         $this->title = get_string('openai_chat', 'block_openai_chat');
@@ -111,12 +113,25 @@ class block_openai_chat extends block_base {
         ) {
             $this->content->footer = get_string('apikeymissing', 'block_openai_chat');
         } else {
+            $default_model = get_config('block_openai_chat', 'model');
+            if (!empty($this->config) && property_exists($this->config, 'model') && $this->config->model) {
+                $default_model = $this->config->model;
+            }
+            $all_models = array_keys(get_models()['models']);
+            $models = array_map(function($m) use ($default_model) {
+                return [
+                    'name' => $m,
+                    'selected' => (trim($m) === trim($default_model))
+                ];
+            }, $all_models);
             $contextdata = [
                 'logging_enabled' => get_config('block_openai_chat', 'logging'),
                 'is_edit_mode' => $PAGE->user_is_editing(),
                 'pix_popout' => '/blocks/openai_chat/pix/arrow-up-right-from-square.svg',
                 'pix_arrow_right' => '/blocks/openai_chat/pix/arrow-right.svg',
                 'pix_refresh' => '/blocks/openai_chat/pix/refresh.svg',
+                'models' => $models,
+                'default_model' => $default_model,
             ];
 
             $this->content->footer = $OUTPUT->render_from_template('block_openai_chat/control_bar', $contextdata);

@@ -94,7 +94,26 @@ function get_models() {
             'gpt-4.1-nano-2025-04-14' => 'gpt-4.1-nano-2025-04-14',
             'gpt-4-turbo' => 'gpt-4-turbo',
             'gpt-3.5-turbo' => 'gpt-3.5-turbo',
-            'gpt-4' => 'gpt-4'
+            'gpt-4' => 'gpt-4',
+            'claude-opus-4-20250514' => 'claude-opus-4-20250514',
+            'claude-sonnet-4-20250514' => 'claude-sonnet-4-20250514',
+            'claude-3-7-sonnet-20250219-thinking' => 'claude-3-7-sonnet-20250219-thinking',
+            'deepseek-r1-0528' => 'deepseek-r1-0528',
+            'deepseek-v3-0324' => 'deepseek-v3-0324',
+            'gemini-2.0-flash' => 'gemini-2.0-flash',
+            'gemini-2.0-flash-lite' => 'gemini-2.0-flash-lite',
+            'gemini-2.5-pro-preview-05-06' => 'gemini-2.5-pro-preview-05-06',
+            'grok-3-beta' => 'grok-3-beta',
+            'grok-3-deepsearch' => 'grok-3-deepsearch',
+            'grok-3-mini-fast-beta' => 'grok-3-mini-fast-beta',
+            'grok-3-reasoner' => 'grok-3-reasoner',
+            'tts-1' => 'tts-1',
+            'tts-1-hd' => 'tts-1-hd',
+            'whisper-1' => 'whisper-1',
+            'gpt-4.5-preview' => 'gpt-4.5-preview',
+            'o1-preview' => 'o1-preview',
+            'o3-mini' => 'o3-mini',
+            'imagen-3.0-generate-002' => 'imagen-3.0-generate-002',
         ],
         "types" => [
             'gpt-4o'                     => 'chat',
@@ -104,7 +123,26 @@ function get_models() {
             'gpt-4.1-nano-2025-04-14'    => 'chat',
             'gpt-4-turbo'                => 'chat',
             'gpt-3.5-turbo'              => 'chat',
-            'gpt-4'                      => 'chat'
+            'gpt-4'                      => 'chat',
+            'claude-opus-4-20250514'     => 'chat',
+            'claude-sonnet-4-20250514'   => 'chat',
+            'claude-3-7-sonnet-20250219-thinking' => 'chat',
+            'deepseek-r1-0528'           => 'chat',
+            'deepseek-v3-0324'           => 'chat',
+            'gemini-2.0-flash'           => 'chat',
+            'gemini-2.0-flash-lite'      => 'chat',
+            'gemini-2.5-pro-preview-05-06' => 'chat',
+            'grok-3-beta'                => 'chat',
+            'grok-3-deepsearch'          => 'chat',
+            'grok-3-mini-fast-beta'      => 'chat',
+            'grok-3-reasoner'            => 'chat',
+            'tts-1'                      => 'audio',
+            'tts-1-hd'                   => 'audio',
+            'whisper-1'                  => 'audio',
+            'gpt-4.5-preview'            => 'chat',
+            'o1-preview'                 => 'chat',
+            'o3-mini'                    => 'chat',
+            'imagen-3.0-generate-002'    => 'image',
         ]
 
     ];
@@ -140,4 +178,21 @@ function block_openai_chat_extend_navigation_course($nav, $course, $context) {
             null
         );
     }
+}
+
+/**
+ * Trả về endpoint mặc định cho từng nhóm model dựa trên prefix model
+ * @param string $model
+ * @return string endpoint URL
+ */
+function get_model_endpoint($model) {
+    // Tất cả endpoint đều dùng yescale
+    if (strpos($model, 'tts-') === 0 || strpos($model, 'whisper-') === 0) {
+        return 'https://api.yescale.io/v1/audio/transcriptions';
+    }
+    if (strpos($model, 'imagen-') === 0) {
+        return 'https://api.yescale.io/v1/image/generate';
+    }
+    // Mặc định cho các model chat
+    return 'https://api.yescale.io/v1/chat/completions';
 }

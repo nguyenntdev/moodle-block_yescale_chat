@@ -81,7 +81,7 @@ foreach ($setting_names as $setting) {
 }
 
 $engine_class;
-$model = get_config('block_openai_chat', 'model');
+$model = isset($body['model']) && $body['model'] ? clean_param($body['model'], PARAM_TEXT) : get_config('block_openai_chat', 'model');
 $api_type = get_config('block_openai_chat', 'type');
 $engine_class = "\block_openai_chat\completion\\$api_type";
 
@@ -90,6 +90,7 @@ $response = $completion->create_completion($PAGE->context);
 
 // Format the markdown of each completion message into HTML.
 $response["message"] = format_text($response["message"], FORMAT_MARKDOWN, ['context' => $context]);
+$response["model"] = $model;
 
 // Log the message
 log_message($message, $response['message'], $context);

@@ -30,10 +30,11 @@ defined('MOODLE_INTERNAL') || die;
 class assistant extends \block_openai_chat\completion {
 
     private $thread_id;
+    protected $endpoint;
 
     public function __construct($model, $message, $history, $block_settings, $thread_id) {
         parent::__construct($model, $message, $history, $block_settings);
-
+        $this->endpoint = \get_model_endpoint($model);
         // If thread_id is NULL, create a new thread
         if (!$thread_id) {
             $thread_id = $this->create_thread();
@@ -60,7 +61,7 @@ class assistant extends \block_openai_chat\completion {
             ),
         ));
 
-        $response = $curl->post("https://api.yescale.io/v1/threads");
+        $response = $curl->post($this->endpoint . "/threads");
         $response = json_decode($response);
 
         return $response->id;
@@ -82,7 +83,7 @@ class assistant extends \block_openai_chat\completion {
         ));
 
         $response = $curl->post(
-            "https://api.yescale.io/v1/threads/" . $this->thread_id ."/messages", 
+            $this->endpoint . "/threads/" . $this->thread_id . "/messages",
             json_encode($curlbody)
         );
         $response = json_decode($response);
@@ -95,7 +96,6 @@ class assistant extends \block_openai_chat\completion {
      * @return JSON: The response from OpenAI
      */
     private function run() {
-
         $curlbody = [
             "assistant_id" => $this->assistant,
         ];
@@ -113,7 +113,7 @@ class assistant extends \block_openai_chat\completion {
         ));
 
         $response = $curl->post(
-            "https://api.yescale.io/v1/threads/" . $this->thread_id . "/runs", 
+            $this->endpoint . "/threads/" . $this->thread_id . "/runs",
             json_encode($curlbody)
         );
         $response = json_decode($response);
@@ -146,7 +146,7 @@ class assistant extends \block_openai_chat\completion {
                 'OpenAI-Beta: assistants=v2'
             ),
         ));
-        $response = $curl->get("https://api.yescale.io/v1/threads/" . $this->thread_id . '/messages');
+        $response = $curl->get($this->endpoint . "/threads/" . $this->thread_id . '/messages');
         $response = json_decode($response);
 
         return [
@@ -166,7 +166,7 @@ class assistant extends \block_openai_chat\completion {
             ),
         ));
 
-        $response = $curl->get("https://api.yescale.io/v1/threads/" . $this->thread_id . "/runs/" . $run_id);
+        $response = $curl->get($this->endpoint . "/threads/" . $this->thread_id . "/runs/" . $run_id);
         $response = json_decode($response);
         
         if ($response->status === 'completed' || property_exists($response, 'error')) {

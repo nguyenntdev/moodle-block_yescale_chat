@@ -1,5 +1,5 @@
-var questionString = 'Ask a question...'
-var errorString = 'An error occurred! Please try again later.'
+let questionString = 'Ask a question...'
+let errorString = 'An error occurred! Please try again later.'
 
 export const init = (data) => {
     const blockId = data['blockId']
@@ -43,6 +43,15 @@ export const init = (data) => {
 
     document.querySelector(`.block_openai_chat[data-instance-id='${blockId}'] #openai_input`).addEventListener('keyup', e => {
         if (e.which === 13 && e.target.value !== "") {
+            // Micro-interaction: animate paper-plane icon
+            const icon = document.querySelector('#go .openai_input_submit_btn_icon');
+            if (icon) {
+                icon.style.transition = 'transform 0.3s cubic-bezier(0.4,0,0.2,1)';
+                icon.style.transform = 'rotate(45deg) translateY(-5px)';
+                setTimeout(() => {
+                    icon.style.transform = '';
+                }, 300);
+            }
             addToChatLog('user', e.target.value, blockId)
             createCompletion(e.target.value, blockId, api_type)
             e.target.value = ''
@@ -51,6 +60,15 @@ export const init = (data) => {
     document.querySelector(`.block_openai_chat[data-instance-id='${blockId}'] #go`).addEventListener('click', e => {
         const input = document.querySelector('#openai_input')
         if (input.value !== "") {
+            // Micro-interaction: animate paper-plane icon
+            const icon = document.querySelector('#go .openai_input_submit_btn_icon');
+            if (icon) {
+                icon.style.transition = 'transform 0.3s cubic-bezier(0.4,0,0.2,1)';
+                icon.style.transform = 'rotate(45deg) translateY(-5px)';
+                setTimeout(() => {
+                    icon.style.transform = '';
+                }, 300);
+            }
             addToChatLog('user', input.value, blockId)
             createCompletion(input.value, blockId, api_type)
             input.value = ''
@@ -101,6 +119,18 @@ const addToChatLog = (type, message, blockId) => {
         messageElem.classList.add(className)
     }
 
+    // Add name above message
+    const nameElem = document.createElement('span')
+    nameElem.classList.add('openai_message_name')
+    if (type.includes('user')) {
+        nameElem.textContent = typeof userName !== 'undefined' ? userName : 'User'
+    } else if (type.includes('bot')) {
+        nameElem.textContent = typeof assistantName !== 'undefined' ? assistantName : 'Assistant'
+    } else {
+        nameElem.textContent = ''
+    }
+    messageElem.append(nameElem)
+
     const messageText = document.createElement('span')
     messageText.innerHTML = message
     messageElem.append(messageText)
@@ -134,70 +164,78 @@ const clearHistory = (blockId) => {
  * @param {int} blockId The ID of the block this message is being sent from -- used to override settings if necessary
  * @param {string} api_type "assistant" | "chat" The type of API to use
  */
-const createCompletion = (message, blockId, api_type) => {
-    let threadId = null
-    let chatData
+const createCompletion = async (message, blockId, api_type) => {
+    let threadId = null;
+    let chatData;
 
     // If the type is assistant, attempt to fetch a thread ID
     if (api_type === 'assistant') {
-        chatData = localStorage.getItem("block_openai_chat_data")
+        chatData = localStorage.getItem("block_openai_chat_data");
         if (chatData) {
-            chatData = JSON.parse(chatData)
+            chatData = JSON.parse(chatData);
             if (chatData[blockId]) {
-                threadId = chatData[blockId]['threadId'] || null
+                threadId = chatData[blockId]['threadId'] || null;
             }
         } else {
             // create the chat data item if necessary
-            chatData = {[blockId]: {}}
+            chatData = { [blockId]: {} };
         }
-    }  
+    }
 
-    const history = buildTranscript(blockId)
+    // Always get the model from the dropdown
+    let model = null;
+    model = localStorage.getItem(`block_openai_chat_model_${blockId}`) || null;
 
-    document.querySelector(`.block_openai_chat[data-instance-id='${blockId}'] #control_bar`).classList.add('disabled')
-    document.querySelector(`.block_openai_chat[data-instance-id='${blockId}'] #openai_input`).classList.remove('error')
-    document.querySelector(`.block_openai_chat[data-instance-id='${blockId}'] #openai_input`).placeholder = questionString
-    document.querySelector(`.block_openai_chat[data-instance-id='${blockId}'] #openai_input`).blur()
+    // Debug: log the model being sent
+    console.log('Sending model:', model);
+
+    const history = buildTranscript(blockId);
+
+    const controlBar = document.querySelector(`.block_openai_chat[data-instance-id='${blockId}'] #control_bar`);
+    const inputElem = document.querySelector(`.block_openai_chat[data-instance-id='${blockId}'] #openai_input`);
+    controlBar.classList.add('disabled');
+    inputElem.classList.remove('error');
+    inputElem.placeholder = questionString;
+    inputElem.blur();
     addToChatLog('bot loading', '...', blockId);
 
-    fetch(`${M.cfg.wwwroot}/blocks/openai_chat/api/completion.php`, {
-        method: 'POST',
-        body: JSON.stringify({
-            message: message,
-            history: history,
-            blockId: blockId,
-            threadId: threadId
-        })
-    })
-    .then(response => {
-        let messageContainer = document.querySelector(`.block_openai_chat[data-instance-id='${blockId}'] #openai_chat_log`)
-        messageContainer.removeChild(messageContainer.lastElementChild)
-        document.querySelector(`.block_openai_chat[data-instance-id='${blockId}'] #control_bar`).classList.remove('disabled')
+    try {
+        const response = await fetch(`${M.cfg.wwwroot}/blocks/openai_chat/api/completion.php`, {
+            method: 'POST',
+            body: JSON.stringify({
+                message,
+                history,
+                blockId,
+                threadId,
+                model // always include model
+            })
+        });
+
+        let messageContainer = document.querySelector(`.block_openai_chat[data-instance-id='${blockId}'] #openai_chat_log`);
+        messageContainer.removeChild(messageContainer.lastElementChild);
+        controlBar.classList.remove('disabled');
 
         if (!response.ok) {
-            throw Error(response.statusText)
-        } else {
-            return response.json()
+            throw new Error(response.statusText);
         }
-    })
-    .then(data => {
+
+        const data = await response.json();
         try {
-            addToChatLog('bot', data.message, blockId)
+            addToChatLog('bot', data.message, blockId);
             if (data.thread_id) {
-                chatData[blockId]['threadId'] = data.thread_id
+                chatData[blockId]['threadId'] = data.thread_id;
                 localStorage.setItem("block_openai_chat_data", JSON.stringify(chatData));
             }
         } catch (error) {
-            console.log(error)
-            addToChatLog('bot', data.error.message, blockId)
+            console.error(error);
+            addToChatLog('bot', data.error.message, blockId);
         }
-        document.querySelector(`.block_openai_chat[data-instance-id='${blockId}'] #openai_input`).focus()
-    })
-    .catch(error => {
-        console.log(error)
-        document.querySelector(`.block_openai_chat[data-instance-id='${blockId}'] #openai_input`).classList.add('error')
-        document.querySelector(`.block_openai_chat[data-instance-id='${blockId}'] #openai_input`).placeholder = errorString
-    })
+        inputElem.focus();
+    } catch (error) {
+        console.error(error);
+        inputElem.classList.add('error');
+        inputElem.placeholder = errorString;
+    }
 }
 
 /**

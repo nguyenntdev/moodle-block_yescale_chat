@@ -1,3 +1,19 @@
+# Changelog
+
+## 1.0.3 (2024-06-08)
+- Nâng cấp giao diện hiện đại, UX/UI chi tiết, thân thiện hơn
+- Tối ưu CSS: theming, responsive, sử dụng biến màu, font hiện đại
+- Hỗ trợ localization tiếng Việt đầy đủ
+- Refactor JS sử dụng ES6+, async/await, error handling tốt hơn
+- Cập nhật màu sắc, font, hiệu ứng chuyển động
+- Tăng version và release lên 1.0.3
+
+## 1.0.5 (2024-06-08)
+- Cho phép người dùng cuối chọn model AI động từ giao diện (dropdown model)
+- Sửa backend nhận model động từ client, đảm bảo đồng bộ model khi gửi câu hỏi
+- Endpoint API đồng bộ theo model, luôn dùng https://api.yescale.io/
+- Tăng version và release lên 1.0.5
+
 # moodle-block_openai_chat
 
 <img align="right" src="https://github.com/Limekiller/moodle-block_openai_chat/assets/33644013/21f73adc-5bd4-4539-999b-a3b0a83736e0" />

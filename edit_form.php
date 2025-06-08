@@ -106,10 +106,10 @@ class block_openai_chat_edit_form extends block_edit_form {
                 $mform->setType('config_apikey', PARAM_TEXT);
                 $mform->addHelpButton('config_apikey', 'config_apikey', 'block_openai_chat');
     
-                $mform->addElement('select', 'config_model', get_string('model', 'block_openai_chat'), get_models()['models']);
-                $mform->setDefault('config_model', get_config('block_openai_chat', 'model'));
-                $mform->setType('config_model', PARAM_TEXT);
-                $mform->addHelpButton('config_model', 'config_model', 'block_openai_chat');
+                // $mform->addElement('select', 'config_model', get_string('model', 'block_openai_chat'), get_models()['models']);
+                // $mform->setDefault('config_model', get_config('block_openai_chat', 'model'));
+                // $mform->setType('config_model', PARAM_TEXT);
+                // $mform->addHelpButton('config_model', 'config_model', 'block_openai_chat');
     
                 $mform->addElement('text', 'config_temperature', get_string('temperature', 'block_openai_chat'));
                 $mform->setDefault('config_temperature', 0.5);

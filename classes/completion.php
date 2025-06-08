@@ -53,13 +53,9 @@ class completion {
      * @param string block_settings: An object containing the instance-level settings if applicable
      */
     public function __construct($model, $message, $history, $block_settings) {
-        // Set default values
+        // Luôn ưu tiên model truyền vào
         $this->model = $model;
         $this->apikey = get_config('block_openai_chat', 'apikey');
-
-        // We fetch defaults for both chat and assistant APIs, even though only one can be active at a time
-        // In the past, multiple different completion classes shared API types, so this might happen again
-        // Any settings that don't apply to the current API type are just ignored
 
         $this->prompt = $this->get_setting('prompt', get_string('defaultprompt', 'block_openai_chat'));
         $this->assistantname = $this->get_setting('assistantname', get_string('defaultassistantname', 'block_openai_chat'));
@@ -74,10 +70,10 @@ class completion {
         $this->assistant = $this->get_setting('assistant');
         $this->instructions = $this->get_setting('instructions');
 
-        // Then override with block settings if applicable
+        // Override các trường khác từ block_settings nếu có, nhưng KHÔNG override model
         if (get_config('block_openai_chat', 'allowinstancesettings') === "1") {
             foreach ($block_settings as $name => $value) {
-                if ($value) {
+                if ($value && $name !== 'model') {
                     $this->$name = $value;
                 }
             }
